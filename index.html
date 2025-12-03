@@ -2,53 +2,38 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>Procedural Zen Garden - Day & Night VR</title>
+    <title>Zen Garden VR</title>
     <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
     <style>
       #overlay {
-        position: fixed;
-        top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.9);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-        z-index: 999;
-        color: white;
-        font-family: 'Courier New', Courier, monospace;
-        text-align: center;
-        pointer-events: auto;
+        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.92); color: white; z-index: 999;
+        display: flex; flex-direction: column; justify-content: center; align-items: center;
+        font-family: 'Courier New', monospace; text-align: center;
       }
       .btn {
-        background: #ff9ff3;
-        color: #2d3436;
-        padding: 15px 30px;
-        font-size: 1.2rem;
-        border: none;
-        border-radius: 50px;
-        margin-top: 20px;
-        cursor: pointer;
-        font-weight: bold;
-        transition: transform 0.2s;
+        background: #ff9ff3; color: #2d3436; padding: 18px 40px; font-size: 1.3rem;
+        border: none; border-radius: 50px; margin-top: 25px; cursor: pointer; font-weight: bold;
+        transition: all 0.3s;
       }
-      .btn:hover { transform: scale(1.05); }
-      .a-enter-vr-button { bottom: 20px !important; }
+      .btn:hover { transform: scale(1.08); }
     </style>
 
     <script>
-      // === GARDEN GENERATOR (Rocks + Trees + Fireflies + Birds) ===
       AFRAME.registerComponent('garden-generator', {
         init: function () {
           const scene = this.el;
 
-          // 1. Rocks
+          // === 1. Rocks (scattered naturally) ===
           const rockColors = ['#636e72', '#b2bec3', '#2d3436'];
-          for(let i = 0; i < 8; i++) {
+          for (let i = 0; i < 12; i++) {
             let rock = document.createElement('a-dodecahedron');
-            let x = (Math.random() * 20) - 10;
-            let z = (Math.random() * 20) - 10;
-            if (Math.abs(x) < 2 && Math.abs(z) < 2) continue;
-            let scale = 0.5 + Math.random() * 0.8;
+            let angle = Math.random() * Math.PI * 2;
+            let dist = 6 + Math.random() * 12;
+            let x = Math.cos(angle) * dist;
+            let z = Math.sin(angle) * dist;
+            let scale = 0.6 + Math.random() * 1.2;
+
             rock.setAttribute('position', `${x} ${scale/2} ${z}`);
             rock.setAttribute('radius', scale);
             rock.setAttribute('color', rockColors[Math.floor(Math.random() * rockColors.length)]);
@@ -56,130 +41,121 @@
             scene.appendChild(rock);
           }
 
-          // 2. Stylized Trees
+          // === 2. Trees - Now perfectly surrounding the player in a circle ===
           const treeColors = ['#ff9ff3', '#fd79a8', '#e84393'];
-          for(let i = 0; i < 10; i++) {
+          for (let i = 0; i < 16; i++) {
             let tree = document.createElement('a-entity');
-            let x = (Math.random() * 26) - 13;
-            let z = (Math.random() * 26) - 13;
-            if (Math.abs(x) < 3 && Math.abs(z) < 3) continue;
+            let angle = (i / 16) * Math.PI * 2;
+            let distance = 10 + Math.random() * 8; // 10–18 meters away → perfect zen circle
+            let x = Math.cos(angle) * distance;
+            let z = Math.sin(angle) * distance;
 
             tree.setAttribute('position', `${x} 0 ${z}`);
 
             // Trunk
             let trunk = document.createElement('a-cylinder');
-            trunk.setAttribute('radius', 0.15);
-            trunk.setAttribute('height', 1.5);
+            trunk.setAttribute('radius', 0.18);
+            trunk.setAttribute('height', 1.8);
             trunk.setAttribute('color', '#8d6e63');
-            trunk.setAttribute('position', '0 0.75 0');
+            trunk.setAttribute('position', '0 0.9 0');
             trunk.setAttribute('shadow', 'cast: true');
             tree.appendChild(trunk);
 
-            // Leaves
+            // Leaves (NO rotation anymore)
             let leaves = document.createElement('a-icosahedron');
-            leaves.setAttribute('radius', 1 + Math.random() * 0.8);
-            leaves.setAttribute('color', treeColors[Math.floor(Math.random() * treeColors.length)]);
-            leaves.setAttribute('position', '0 2 0');
-            leaves.setAttribute('shadow', 'cast: true');
-            leaves.setAttribute('animation', 'property: rotation; to: 360 360 360; dur: 15000; loop: true; easing: linear');
+            leaves.setAttribute('radius', 1.3 + Math.random() * 0.7);
+            leaves.setAttribute('color', treeColors[i % treeColors.length]);
+            leaves.setAttribute('position', '0 2.4 0');
+            leaves.setAttribute('shadow', 'cast: true; receive: true');
             tree.appendChild(leaves);
 
             scene.appendChild(tree);
           }
 
-          // 3. Fireflies (visible both day & night)
-          for(let i = 0; i < 15; i++) {
+          // === 3. Fireflies ===
+          for (let i = 0; i < 20; i++) {
             let fly = document.createElement('a-sphere');
-            let x = (Math.random() * 12) - 6;
-            let y = 1 + Math.random() * 3;
-            let z = (Math.random() * 12) - 6;
-            fly.setAttribute('radius', 0.04);
-            fly.setAttribute('color', '#fdde7a');
-            fly.setAttribute('material', 'emissive: #fdde7a; emissiveIntensity: 0.8');
+            let angle = Math.random() * Math.PI * 2;
+            let dist = 3 + Math.random() * 8;
+            let x = Math.cos(angle) * dist;
+            let z = Math.sin(angle) * dist;
+            let y = 1.5 + Math.random() * 2.5;
+
             fly.setAttribute('position', `${x} ${y} ${z}`);
-            fly.setAttribute('animation', 'property: position; to: ' + x + ' ' + (y+0.7) + ' ' + z + '; dir: alternate; dur: ' + (2000 + Math.random()*3000) + '; loop: true; easing: easeInOutSine');
+            fly.setAttribute('radius', 0.05);
+            fly.setAttribute('color', '#fffaa8');
+            fly.setAttribute('material', 'emissive: #fffaa8; emissiveIntensity: 1');
+            fly.setAttribute('animation', 'property: position; to: ' + x + ' ' + (y + 0.8) + ' ' + z +
+              '; dir: alternate; dur: ' + (2000 + Math.random() * 3000) + '; loop: true; easing: easeInOutSine');
             scene.appendChild(fly);
           }
 
-          // 4. Day Birds (5 groups circling)
-          for(let i = 0; i < 7; i++) {
+          // === 4. Day Birds ===
+          for (let i = 0; i < 5; i++) {
             let pivot = document.createElement('a-entity');
             pivot.classList.add('day-birds');
-            pivot.setAttribute('rotation', '0 ' + Math.random()*360 + ' 0');
-
-            pivot.setAttribute('animation', 'property: rotation; to: 0 ' + (360 + Math.random()*720) + ' 0; dur: ' + (30000 + Math.random()*20000) + '; loop: true; easing: linear');
+            pivot.setAttribute('rotation', '0 ' + Math.random() * 360 + ' 0');
+            pivot.setAttribute('animation', 'property: rotation; to: 0 720 0; dur: 50000; loop: true; easing: linear');
 
             let bird = document.createElement('a-entity');
-            let radius = 10 + Math.random()*8;
-            let height = 8 + Math.random()*5;
-            bird.setAttribute('position', radius + ' ' + height + ' 0');
+            let r = 12 + Math.random() * 10;
+            let h = 9 + Math.random() * 6;
+            bird.setAttribute('position', `${r} ${h} 0`);
 
-            // Left wing
             let wingL = document.createElement('a-triangle');
-            wingL.setAttribute('vertex-a', '0 0 0');
-            wingL.setAttribute('vertex-b', '0.3 0 -0.15');
-            wingL.setAttribute('vertex-c', '0.15 0 0.4');
-            wingL.setAttribute('color', '#f5f6fa');
-            wingL.setAttribute('side', 'double');
+            wingL.setAttribute('vertex-a', '0 0 0'); wingL.setAttribute('vertex-b', '0.35 0 -0.15'); wingL.setAttribute('vertex-c', '0.18 0 0.45');
+            wingL.setAttribute('color', '#f8f9fa'); wingL.setAttribute('side', 'double');
+            wingL.setAttribute('animation', 'property: rotation; to: 0 0 60; dir: alternate; dur: 350; loop: true');
 
-            // Right wing
             let wingR = document.createElement('a-triangle');
-            wingR.setAttribute('vertex-a', '0 0 0');
-            wingR.setAttribute('vertex-b', '-0.3 0 -0.15');
-            wingR.setAttribute('vertex-c', '-0.15 0 0.4');
-            wingR.setAttribute('color', '#f5f6fa');
-            wingR.setAttribute('side', 'double');
+            wingR.setAttribute('vertex-a', '0 0 0'); wingR.setAttribute('vertex-b', '-0.35 0 -0.15'); wingR.setAttribute('vertex-c', '-0.18 0 0.45');
+            wingR.setAttribute('color', '#f8f9fa'); wingR.setAttribute('side', 'double');
+            wingR.setAttribute('animation', 'property: rotation; to: 0 0 -60; dir: alternate; dur: 350; loop: true');
 
             bird.appendChild(wingL);
             bird.appendChild(wingR);
-
-            // Gentle bobbing
-            bird.setAttribute('animation__bob', 'property: position; dir: alternate; to: ' + radius + ' ' + (height + 0.8) + ' 0; dur: 2000; loop: true; easing: easeInOutSine');
-
-            // Flapping wings
-            wingL.setAttribute('animation', 'property: rotation; from: 0 0 0; to: 0 0 50; dir: alternate; dur: 400; loop: true');
-            wingR.setAttribute('animation', 'property: rotation; from: 0 0 0; to: 0 0 -50; dir: alternate; dur: 400; loop: true');
-
+            bird.setAttribute('animation__bob', 'property: position; dir: alternate; to: ' + r + ' ' + (h + 1) + ' 0; dur: 2500; loop: true; easing: easeInOutSine');
             pivot.appendChild(bird);
             scene.appendChild(pivot);
           }
 
-          // 5. Stars (only visible at night)
-          for(let i = 0; i < 180; i++) {
+          // === 5. Stars - Now perfectly visible & beautiful ===
+          for (let i = 0; i < 250; i++) {
             let star = document.createElement('a-sphere');
             let theta = Math.random() * Math.PI * 2;
             let phi = Math.acos(2 * Math.random() - 1);
-            let radius = 48;
+            let radius = 49;
 
             let x = radius * Math.sin(phi) * Math.cos(theta);
-            let y = radius * Math.sin(phi) * Math.sin(theta);
+            let y = radius * Math.sin(phi) * Math.sin(theta) + 30;
             let z = radius * Math.cos(phi);
 
-            star.setAttribute('position', `${x} ${y + 20} ${z}`);
-            star.setAttribute('radius', 0.15 + Math.random() * 0.2);
+            star.setAttribute('position', `${x} ${y} ${z}`);
+            star.setAttribute('radius', 0.18 + Math.random() * 0.15);
             star.setAttribute('color', '#ffffff');
-            star.setAttribute('material', 'emissive: #ffffff; emissiveIntensity: 0.9; opacity: 0');
+            star.setAttribute('material', 'emissive: #ffffff; emissiveIntensity: 0; opacity: 0; metalness: 0; roughness: 0');
             star.classList.add('night-star');
 
-            // Twinkle animation
+            let twinkleDur = 3000 + Math.random() * 4000;
             let delay = Math.random() * 5000;
-            star.setAttribute('animation__twinkle', {
+
+            star.setAttribute('animation__opacity', {
               property: 'material.opacity',
-              from: 0.3,
-              to: 1,
-              dur: 2000 + Math.random() * 3000,
+              from: 0.4, to: 1,
+              dur: twinkleDur,
               dir: 'alternate',
               loop: true,
-              delay: delay
+              delay: delay,
+              easing: 'easeInOutSine'
             });
-            star.setAttribute('animation__twinkle2', {
+            star.setAttribute('animation__glow', {
               property: 'material.emissiveIntensity',
-              from: 0.5,
-              to: 1.5,
-              dur: 2000 + Math.random() * 3000,
+              from: 0.6, to: 2.2,
+              dur: twinkleDur,
               dir: 'alternate',
               loop: true,
-              delay: delay
+              delay: delay,
+              easing: 'easeInOutSine'
             });
 
             scene.appendChild(star);
@@ -187,69 +163,56 @@
         }
       });
 
-      // === DAY/NIGHT CONTROLLER ===
+      // === PERFECT Day/Night Toggle (Works Forever) ===
       AFRAME.registerComponent('atmosphere-control', {
         init: function () {
           this.isDay = true;
           this.sky = document.querySelector('a-sky');
           this.light = document.querySelector('#mainLight');
           this.sunMoon = this.el;
-          this.scene = document.querySelector('a-scene');
+          this.sceneEl = document.querySelector('a-scene');
 
-          this.el.addEventListener('click', () => this.toggleDayNight());
+          this.el.addEventListener('click', () => this.toggle());
         },
 
-        toggleDayNight: function () {
+        toggle: function () {
           const birds = document.querySelectorAll('.day-birds');
           const stars = document.querySelectorAll('.night-star');
 
           if (this.isDay) {
-            // → Night
-            this.sky.setAttribute('color', '#0a1a2f');
-            this.sky.setAttribute('animation', 'property: color; to: #0a1a2f; dur: 3000; easing: easeInOutQuad');
+            // → NIGHT
+            this.sky.setAttribute('color', '#0a1428');
+            this.light.setAttribute('intensity', 0.03);
+            this.sceneEl.setAttribute('fog', 'color: #0a1428; density: 0.05');
 
-            this.light.setAttribute('intensity', 0.1);
-            this.light.setAttribute('animation', 'property: intensity; to: 0.1; dur: 3000');
-
-            this.scene.setAttribute('fog', 'color: #0a1a2f; density: 0.04');
-
-            // Hide birds
             birds.forEach(b => b.setAttribute('visible', false));
-
-            // Show stars
             stars.forEach(s => {
               s.setAttribute('material', 'opacity', 1);
-              s.components['animation__twinkle'] && s.components['animation__twinkle'].start();
-              s.components['animation__twinkle2'] && s.components['animation__twinkle2'].start();
+              s.setAttribute('material', 'emissiveIntensity', 1.5);
             });
 
-            // Turn sun into moon
-            this.sunMoon.setAttribute('color', '#f0f0f0');
-            this.sunMoon.setAttribute('material', 'emissive: #ffffff; emissiveIntensity: 0.6');
-            this.sunMoon.setAttribute('light', 'type: point; intensity: 1.5; distance: 30');
+            // Moon
+            this.sunMoon.setAttribute('color', '#f0f4f8');
+            this.sunMoon.setAttribute('material', 'emissive: #dde4ff; emissiveIntensity: 0.9');
+            this.sunMoon.setAttribute('light', 'type: point; intensity: 2.2; distance: 50');
 
           } else {
-            // → Day
+            // → DAY
             this.sky.setAttribute('color', '#81ecec');
-            this.sky.setAttribute('animation', 'property: color; to: #81ecec; dur: 3000');
-
             this.light.setAttribute('intensity', 1);
-            this.light.setAttribute('animation', 'property: intensity; to: 1; dur: 3000');
+            this.sceneEl.setAttribute('fog', 'color: #e0f7fa; density: 0.04');
 
-            this.scene.setAttribute('fog', 'color: #e0f7fa; density: 0.04');
-
-            // Show birds
             birds.forEach(b => b.setAttribute('visible', true));
+            stars.forEach(s => {
+              s.setAttribute('material', 'opacity', 0);
+              s.setAttribute('material', 'emissiveIntensity', 0);
+            });
 
-            // Hide stars
-            stars.forEach(s => s.setAttribute('material', 'opacity', 0));
-
-            // Turn moon back into sun
+            // Sun
             this.sunMoon.setAttribute('color', '#ff7675');
-            this.sunMoon.removeAttribute('light');
             this.sunMoon.setAttribute('material', 'shader: flat');
+            this.sunMoon.removeAttribute('light');
           }
-
           this.isDay = !this.isDay;
         }
       });
@@ -258,51 +221,30 @@
   <body>
 
     <div id="overlay">
-      <h1>🌸 ZEN GARDEN VR 🌸</h1>
-      <p>Procedural world with Day/Night Cycle</p>
-      <p>→ Birds in the day</p>
-      <p>→ Stars & Moon at night</p>
-      <p>Click or stare at the Sun/Moon to change time</p>
-      <button class="btn" onclick="document.querySelector('#overlay').style.display='none';">ENTER ZEN</button>
+      <h1>ZEN GARDEN VR</h1>
+      <p>Procedural Peaceful World</p>
+      <p>• Trees surround you in harmony</p>
+      <p>• Birds fly during the day</p>
+      <p>• Stars twinkle beautifully at night</p>
+      <p>Stare or click the Sun/Moon to change time</p>
+      <button class="btn" onclick="document.querySelector('#overlay').style.display='none'">ENTER ZEN</button>
     </div>
 
-    <a-scene 
-      garden-generator 
-      fog="type: exponential; color: #e0f7fa; density: 0.04" 
-      background="color: #81ecec" 
-      shadow="type: pcfsoft">
-
+    <a-scene garden-generator fog="type: exponential; color: #e0f7fa; density: 0.04" shadow="type: pcfsoft">
       <a-sky color="#81ecec"></a-sky>
+      <a-plane rotation="-90 0 0" width="120" height="120" color="#f5f5dc" shadow="receive: true"></a-plane>
 
-      <!-- Ground -->
-      <a-plane rotation="-90 0 0" width="100" height="100" color="#f5f5dc" shadow="receive: true"></a-plane>
+      <a-light type="ambient" intensity="0.5" color="#ffffff"></a-light>
+      <a-light id="mainLight" type="directional" intensity="1" position="8 20 10" castShadow="true"></a-light>
 
-      <!-- Lighting -->
-      <a-light type="ambient" color="#ddd" intensity="0.4"></a-light>
-      <a-light id="mainLight" type="directional" intensity="1" position="5 10 5" castShadow="true"></a-light>
+      <a-sphere id="sunmoon" class="clickable" atmosphere-control
+                position="0 10 -20" radius="2.2" color="#ff7675" shader="flat"></a-sphere>
 
-      <!-- Interactive Sun / Moon -->
-      <a-sphere 
-        id="sunmoon"
-        class="clickable"
-        atmosphere-control
-        position="0 7 -12"
-        radius="1.8"
-        color="#ff7675"
-        shader="flat">
-      </a-sphere>
-
-      <!-- Camera Rig -->
-      <a-entity position="0 1.6 4">
+      <a-entity position="0 1.6 0">
         <a-camera>
-          <a-cursor 
-            color="#ffffff" 
-            fuse="true" 
-            raycaster="objects: .clickable">
-          </a-cursor>
+          <a-cursor color="white" fuse="true" raycaster="objects: .clickable"></a-cursor>
         </a-camera>
       </a-entity>
-
     </a-scene>
   </body>
 </html>
