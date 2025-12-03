@@ -1,279 +1,301 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="utf-8">
-    <title>Zen Garden VR</title>
-    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
-    <style>
-      body { margin: 0; overflow: hidden; font-family: 'Segoe UI', sans-serif; }
-      
-      #overlay {
-        position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-        background: rgba(0,0,0,0.95); color: white; z-index: 999;
-        display: flex; flex-direction: column; justify-content: center; align-items: center;
-        text-align: center;
-      }
-      .btn {
-        background: #ff9ff3; color: #2d3436; padding: 20px 50px; font-size: 1.5rem;
-        border: none; border-radius: 60px; margin-top: 30px; cursor: pointer; font-weight: bold;
-        box-shadow: 0 0 30px #ff9ff3; transition: all 0.3s;
-      }
-      .btn:hover { transform: scale(1.1); }
+<head>
+  <meta charset="utf-8">
+  <title>Zen Garden of Deep Time • Eternal Garden Edition</title>
+  <meta name="description" content="The garden is eternal. The Earth remembers when you gaze.">
+  <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+  <style>
+    body { margin:0; overflow:hidden; background:#000; font-family:'Segoe UI',sans-serif; }
+    #overlay {
+      position:fixed; inset:0; background:rgba(0,0,0,0.98); color:#fff; z-index:9999;
+      display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center;
+      transition:opacity 2s ease-out;
+    }
+    h1 { font-size:3.8rem; margin:0 0 20px; background:linear-gradient(90deg,#ff9ff3,#74b9ff,#a29bfe); -webkit-background-clip:text; -webkit-text-fill-color:transparent; }
+    .btn {
+      background:#ff9ff3; color:#2d3436; padding:20px 80px; font-size:1.9rem; margin-top:50px;
+      border:none; border-radius:70px; cursor:pointer; font-weight:bold; box-shadow:0 0 60px #ff9ff3;
+      transition:all .4s;
+    }
+    .btn:hover { transform:scale(1.15); box-shadow:0 0 90px #ff9ff3; }
 
-      /* Responsive Info Panel - Top Right Corner */
-      #info-panel {
-        position: fixed;
-        top: 20px; right: 20px;
-        max-width: 380px;
-        background: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(12px);
-        -webkit-backdrop-filter: blur(12px);
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        border-radius: 16px;
-        padding: 16px 20px;
-        box-shadow: 0 8px 32px rgba(0,0,0,0.3);
-        opacity: 0;
-        transform: translateY(-20px);
-        transition: all 0.4s ease;
-        pointer-events: none;
-        z-index: 100;
-        font-size: clamp(14px, 2.5vw, 18px); /* Responsive text */
-        line-height: 1.5;
-      }
-      #info-panel.show {
-        opacity: 1;
-        transform: translateY(0);
-      }
-      #info-title {
-        font-weight: bold;
-        margin-bottom: 6px;
-        font-size: clamp(18px, 3vw, 24px);
-        text-shadow: 0 2px 10px rgba(0,0,0,0.4);
-      }
-      #info-text {
-        opacity: 0.9;
-      }
+    #info-panel {
+      position:fixed; top:20px; right:20px; max-width:420px; padding:22px 28px;
+      background:rgba(0,0,0,0.4); backdrop-filter:blur(16px); border:1px solid rgba(255,255,255,0.25);
+      border-radius:22px; box-shadow:0 10px 40px rgba(0,0,0,0.6); z-index:100; opacity:0;
+      transform:translateY(-15px); transition:all 0.6s ease; pointer-events:none;
+      font-size:clamp(15px,2.6vw,20px); line-height:1.6;
+    }
+    #info-panel.show { opacity:1; transform:translateY(0); }
+    #info-title { font-weight:bold; font-size:1.5em; margin-bottom:8px; }
+    #info-subtitle { font-size:0.85em; opacity:0.85; font-style:italic; margin-bottom:8px; }
+  </style>
+</head>
+<body>
 
-      /* Day / Night text color */
-      .day-text { color: #000000 !important; }
-      .night-text { color: #ffffff !important; }
-    </style>
-  </head>
-  <body>
+<div id="overlay">
+  <h1>ZEN GARDEN<br>OF DEEP TIME</h1>
+  <p>The garden is eternal.<br>Gaze at any glowing orb in the sky —<br>the Earth will remember its ancient forms around you.</p>
+  <p>Look away to return to peace.</p>
+  <button class="btn" onclick="document.getElementById('overlay').style.opacity=0;setTimeout(()=>this.parentNode.remove(),2100)">
+    ENTER THE ETERNAL GARDEN
+  </button>
+</div>
 
-    <div id="overlay">
-      <h1>ZEN GARDEN</h1>
-      <p>Stare at anything to learn its wisdom</p>
-      <p>Stare at the Sun/Moon to change time</p>
-      <button class="btn" onclick="document.getElementById('overlay').style.display='none'">ENTER PEACE</button>
-    </div>
+<div id="info-panel">
+  <div id="info-title">Welcome home</div>
+  <div id="info-subtitle"></div>
+  <div id="info-text">Rest your gaze on any glowing orb above...</div>
+</div>
 
-    <!-- Responsive Info Panel -->
-    <div id="info-panel">
-      <div id="info-title">Welcome</div>
-      <div id="info-text">Look around and discover the soul of this garden...</div>
-    </div>
+<a-scene fog="type: exponential; color: #e0f7fa; density: 0.035" shadow="type: pcfsoft" cursor="rayOrigin: mouse">
+  
+  <a-sky id="sky" color="#81ecec"></a-sky>
+  <a-plane id="ground" rotation="-90 0 0" width="180" height="180" color="#f5f5dc" receiveShadow></a-plane>
 
-    <a-scene garden-generator fog="type: exponential; color: #e0f7fa; density: 0.04" shadow="type: pcfsoft">
-      
-      <a-sky color="#81ecec"></a-sky>
-      <a-plane rotation="-90 0 0" width="120" height="120" color="#f5f5dc" shadow="receive: true"></a-plane>
+  <!-- Lights -->
+  <a-light type="ambient" intensity="0.6" id="ambient"></a-light>
+  <a-light id="sunlight" type="directional" intensity="1" position="10 25 15" castShadow></a-light>
 
-      <a-light type="ambient" intensity="0.5"></a-light>
-      <a-light id="mainLight" type="directional" intensity="1" position="8 20 10" castShadow="true"></a-light>
+  <!-- Sun/Moon (day-night toggle) -->
+  <a-sphere id="sunmoon" position="0 15 -35" radius="3.8" color="#ff7675" shader="flat" atmosphere-control
+            class="info-item" data-name="The Eternal Flame" data-desc="Stare to cycle day and night"></a-sphere>
 
-      <!-- Sun/Moon -->
-      <a-sphere id="sunmoon" class="clickable info-item" data-name="The Eternal Flame" data-desc="Giver of light and changer of time. One stare flips the world."
-                position="0 10 -20" radius="2.2" color="#ff7675" shader="flat" atmosphere-control></a-sphere>
+  <!-- Camera -->
+  <a-entity position="0 1.6 6">
+    <a-camera>
+      <a-cursor color="#ff9ff3" fuse="true" raycaster="objects: .era-orb, .info-item"></a-cursor>
+    </a-camera>
+  </a-entity>
 
-      <!-- Camera -->
-      <a-entity position="0 1.6 0">
-        <a-camera>
-          <a-cursor color="#ff9ff3" fuse="true" raycaster="objects: .info-item"></a-cursor>
-        </a-camera>
-      </a-entity>
+  <!-- Garden + Era Orbs -->
+  <a-entity garden-and-eras></a-entity>
 
-    </a-scene>
+  <!-- Particle systems (activated per era) -->
+  <a-entity id="particles"></a-entity>
 
-    <script>
-      // === GARDEN GENERATOR ===
-      AFRAME.registerComponent('garden-generator', {
-        init: function () {
-          const scene = this.el;
+</a-scene>
 
-          // Trees - Now with proper info + perfect circle
-          const treeNames = ["Sakura of Serenity", "Bonsai Master", "Whispering Pine", "Blossom Guardian", "Ancient Willow", "Lotus Tree", "Moonlit Cedar", "Dawn Cherry"];
-          const treeDescs = [
-            "Blooms only when your soul is calm.",
-            "500 years old. Still shorter than your ego.",
-            "Listens to your thoughts. Judges quietly.",
-            "Protects the garden from bad vibes.",
-            "Has seen empires rise and fall. Unimpressed.",
-            "Rooted in water, growing in dreams.",
-            "Glows faintly under moonlight.",
-            "Wakes up early to catch the sunrise."
-          ];
-          for (let i = 0; i < 16; i++) {
-            let tree = document.createElement('a-entity');
-            let angle = (i / 16) * Math.PI * 2 + Math.random() * 0.3;
-            let dist = 10 + Math.random() * 7;
-            let x = Math.cos(angle) * dist;
-            let z = Math.sin(angle) * dist;
+<script>
+  // ====================== GARDEN + ERA ORBS ======================
+  AFRAME.registerComponent('garden-and-eras', {
+    init: function () {
+      const scene = this.el;
 
-            tree.setAttribute('position', `${x} 0 ${z}`);
-            tree.classList.add('info-item');
-            tree.setAttribute('data-name', treeNames[i % 8]);
-            tree.setAttribute('data-desc', treeDescs[i % 8]);
+      // === Permanent Zen Garden (trees, rocks, birds, fireflies, stars) ===
+      this.createTrees(scene);
+      this.createRocks(scene);
+      this.createFireflies(scene);
+      this.createBirds(scene);
+      this.createStars(scene);
 
-            let trunk = document.createElement('a-cylinder');
-            trunk.setAttribute('radius', 0.18); trunk.setAttribute('height', 1.8); trunk.setAttribute('color', '#8d6e63');
-            trunk.setAttribute('position', '0 0.9 0');
-            tree.appendChild(trunk);
+      // === 8 Glowing Era Orbs in the Sky ===
+      const eras = [
+        {era:"molten",    pos:"-25 18 -15", color:"#ff3400", name:"The Molten Cradle",          subtitle:"Hadean • 4.54 billion years ago", desc:"Earth was a magma ocean. The first rocks cooled in fire.", effect:"lava"},
+        {era:"storms",    pos:"-20 20 10",  color:"#0077ff", name:"Ocean of Storms",            subtitle:"Archean • ~4.0 bya", desc:"Endless acid rain created the first oceans.", effect:"rain"},
+        {era:"breath",    pos:"-10 22 20",  color:"#cc00ff", name:"First Breath",               subtitle:"Great Oxidation • 2.4 bya", desc:"Microbes filled the air with oxygen — and rust.", effect:"bubbles"},
+        {era:"snowball",  pos:"8 19 25",    color:"#ccffff", name:"Snowball Earth",             subtitle:"Cryogenian • 720–635 mya", desc:"The entire planet froze. Life survived under ice.", effect:"snow"},
+        {era:"cambrian",  pos:"22 21 12",   color:"#00ffcc", name:"Cambrian Explosion",         subtitle:"541 mya", desc:"Eyes, mouths, predators — all born in one cosmic heartbeat.", effect:"fish"},
+        {era:"forests",   pos:"25 20 -10",  color:"#0f8040", name:"Age of Giant Forests",       subtitle:"Carboniferous • 300 mya", desc:"Oxygen peaked at 35%. Dragonflies were the size of hawks.", effect:"spores"},
+        {era:"dinosaurs", pos:"15 19 -22",  color:"#52b788", name:"Reign of Dinosaurs",         subtitle:"Cretaceous • 145–66 mya", desc:"They ruled for 165 million years. We are a blink.", effect:"ash"},
+        {era:"present",   pos:"0 25 0",     color:"#ff9ff3", name:"The Human Moment",           subtitle:"Anthropocene • Now", desc:"You are the garden’s first conscious dreamer.", effect:"none"}
+      ];
 
-            let leaves = document.createElement('a-icosahedron');
-            leaves.setAttribute('radius', 1.4); 
-            leaves.setAttribute('color', ['#ff9ff3', '#fd79a8', '#e84393'][i % 3]);
-            leaves.setAttribute('position', '0 2.4 0');
-            tree.appendChild(leaves);
-
-            scene.appendChild(tree);
-          }
-
-          // Rocks, Fireflies, Birds, Stars — same as before but with info
-          // (Abbreviated for clarity — full code below)
-
-          // Rocks
-          for (let i = 0; i < 12; i++) {
-            let rock = document.createElement('a-dodecahedron');
-            let angle = Math.random() * Math.PI * 2;
-            let dist = 6 + Math.random() * 12;
-            let x = Math.cos(angle) * dist;
-            let z = Math.sin(angle) * dist;
-            let scale = 0.7 + Math.random() * 1;
-            rock.setAttribute('position', `${x} ${scale/2} ${z}`);
-            rock.setAttribute('radius', scale);
-            rock.setAttribute('color', '#636e72');
-            rock.classList.add('info-item');
-            rock.setAttribute('data-name', ['Zen Stone', 'Mossy Sage', 'Eternal Pebble'][i%3]);
-            rock.setAttribute('data-desc', "Unmoved by time. Unbothered by drama.");
-            scene.appendChild(rock);
-          }
-
-          // Fireflies
-          for (let i = 0; i < 20; i++) {
-            let fly = document.createElement('a-sphere');
-            let angle = Math.random() * Math.PI * 2;
-            let dist = 3 + Math.random() * 8;
-            let x = Math.cos(angle) * dist;
-            let z = Math.sin(angle) * dist;
-            let y = 1.5 + Math.random() * 3;
-            fly.setAttribute('position', `${x} ${y} ${z}`);
-            fly.setAttribute('radius', 0.06);
-            fly.setAttribute('color', '#fffaa8');
-            fly.setAttribute('material', 'emissive: #fffaa8; emissiveIntensity: 1.2');
-            fly.classList.add('info-item');
-            fly.setAttribute('data-name', "Lantern Spirit");
-            fly.setAttribute('data-desc', "Guides lost souls home. Also likes to party.");
-            scene.appendChild(fly);
-          }
-
-          // Birds & Stars (same logic with info-item class)
-          // ... (same as previous version)
-
-          // Stars
-          for (let i = 0; i < 250; i++) {
-            let star = document.createElement('a-sphere');
-            let theta = Math.random() * Math.PI * 2;
-            let phi = Math.acos(2 * Math.random() - 1);
-            let radius = 49;
-            let x = radius * Math.sin(phi) * Math.cos(theta);
-            let y = radius * Math.sin(phi) * Math.sin(theta) + 30;
-            let z = radius * Math.cos(phi);
-            star.setAttribute('position', `${x} ${y} ${z}`);
-            star.setAttribute('radius', 0.2 + Math.random() * 0.15);
-            star.setAttribute('material', 'emissive: white; opacity: 0');
-            star.classList.add('night-star', 'info-item');
-            star.setAttribute('data-name', "Ancient Light");
-            star.setAttribute('data-desc', "Died billions of years ago. Still shining for you.");
-            scene.appendChild(star);
-          }
-        }
+      eras.forEach(e => {
+        const orb = document.createElement('a-sphere');
+        orb.setAttribute('position', e.pos);
+        orb.setAttribute('radius', 1.6);
+        orb.setAttribute('color', e.color);
+        orb.setAttribute('material', `emissive:${e.color}; emissiveIntensity:0.9; opacity:0.88`);
+        orb.setAttribute('animation', 'property: position; from:'+e.pos+' ; to:'+e.pos.replace(/(\d+)/g,(m,p)=>parseFloat(p)+1)+' ; dur:14000; dir:alternate; loop:true; easing:easeInOutSine');
+        orb.classList.add('era-orb', 'info-item');
+        orb.setAttribute('data-era', e.era);
+        orb.setAttribute('data-name', e.name);
+        orb.setAttribute('data-subtitle', e.subtitle);
+        orb.setAttribute('data-desc', e.desc);
+        orb.setAttribute('data-effect', e.effect || 'none');
+        scene.appendChild(orb);
       });
+    },
 
-      // === DAY/NIGHT + AUTO TEXT COLOR ===
-      AFRAME.registerComponent('atmosphere-control', {
-        init: function () {
-          this.isDay = true;
-          this.sky = document.querySelector('a-sky');
-          this.light = document.querySelector('#mainLight');
-          this.sunMoon = this.el;
-          this.sceneEl = document.querySelector('a-scene');
-          this.panel = document.getElementById('info-panel');
-          this.title = document.getElementById('info-title');
-          this.text = document.getElementById('info-text');
+    createTrees: function(s) { 
+      const names = ["Sakura of Serenity","Bonsai Master","Whispering Pine","Blossom Guardian","Ancient Willow","Lotus Tree","Moonlit Cedar","Dawn Cherry"];
+      const descs = ["Blooms only when your soul is calm.","500 years old. Still shorter than your ego.","Listens to your thoughts. Judges quietly.","Protects the garden from bad vibes.","Has seen empires rise and fall. Unimpressed.","Rooted in water, growing in dreams.","Glows faintly under moonlight.","Wakes up early to catch the sunrise."];
+      for(let i=0;i<16;i++){const a=(i/16)*Math.PI*2+Math.random()*0.4;const d=12+Math.random()*10;const x=Math.cos(a)*d,z=Math.sin(a)*d;
+        const t=document.createElement('a-entity');t.setAttribute('position',`${x} 0 ${z}`);t.classList.add('info-item', 'life');
+        t.setAttribute('data-name',names[i%8]);t.setAttribute('data-desc',descs[i%8]);
+        const trunk=document.createElement('a-cylinder');trunk.setAttribute('radius',0.2);trunk.setAttribute('height',2.2);trunk.setAttribute('color','#8d6e63');trunk.setAttribute('position','0 1.1 0');t.appendChild(trunk);
+        const leaves=document.createElement('a-icosahedron');leaves.setAttribute('radius',1.6);leaves.setAttribute('color',['#ff9ff3','#fd79a8','#e84393','#a29bfe'][i%4]);leaves.setAttribute('position','0 2.8 0');t.appendChild(leaves);
+        s.appendChild(t);
+      }
+    },
+    createRocks: function(s){ for(let i=0;i<15;i++){const a=Math.random()*Math.PI*2,d=8+Math.random()*15,sc=0.7+Math.random()*1.2;
+      const r=document.createElement('a-dodecahedron');r.setAttribute('position',`${Math.cos(a)*d} ${sc/2} ${Math.sin(a)*d}`);r.setAttribute('radius',sc);r.setAttribute('color','#636e72');r.classList.add('info-item');
+      r.setAttribute('data-name',['Zen Stone','Mossy Sage','Eternal Pebble'][i%3]);r.setAttribute('data-desc','Unmoved by time. Unbothered by drama.');s.appendChild(r);
+    }},
+    createFireflies: function(s){ for(let i=0;i<25;i++){const a=Math.random()*Math.PI*2,d=4+Math.random()*12,y=1.5+Math.random()*5;
+      const f=document.createElement('a-sphere');f.setAttribute('position',`${Math.cos(a)*d} ${y} ${Math.sin(a)*d}`);f.setAttribute('radius',0.07);f.setAttribute('material','emissive:#fffaa8; emissiveIntensity:1.5');f.classList.add('info-item', 'life');
+      f.setAttribute('data-name','Lantern Spirit');f.setAttribute('data-desc','Guides lost souls home. Also likes to party.');s.appendChild(f);
+    }},
+    createBirds: function(s){ for(let i=0;i<10;i++){const a=(i/10)*Math.PI*2,d=20+Math.random()*15;
+      const b=document.createElement('a-sphere');b.setAttribute('position',`${Math.cos(a)*d} ${12+Math.random()*8} ${Math.sin(a)*d}`);b.setAttribute('radius',0.18);b.setAttribute('color','#fff');b.classList.add('day-birds','info-item', 'life');
+      b.setAttribute('data-name','Sky Wanderer');b.setAttribute('data-desc','Flies nowhere in particular. Living the dream.');s.appendChild(b);
+    }},
+    createStars: function(s){ for(let i=0;i<320;i++){const theta=Math.random()*Math.PI*2,phi=Math.acos(2*Math.random()-1),r=55;
+      const x=r*Math.sin(phi)*Math.cos(theta),y=r*Math.sin(phi)*Math.sin(theta)+38,z=r*Math.cos(phi);
+      const st=document.createElement('a-sphere');st.setAttribute('position',`${x} ${y} ${z}`);st.setAttribute('radius',0.18+Math.random()*0.15);
+      st.setAttribute('material','color:#fff; emissive:#fff; opacity:0');st.classList.add('night-star','info-item');
+      st.setAttribute('data-name','Ancient Light');st.setAttribute('data-desc','Died billions of years ago. Still shining for you.');s.appendChild(st);
+    }}
+  });
 
-          this.el.addEventListener('click', () => this.toggle());
-        },
-        toggle: function () {
-          const birds = document.querySelectorAll('.day-birds');
-          const stars = document.querySelectorAll('.night-star');
+  // ====================== DAY/NIGHT CYCLE ======================
+  AFRAME.registerComponent('atmosphere-control', {
+    init: function () {
+      this.isDay = true;
+      this.sky = document.querySelector('#sky');
+      this.light = document.querySelector('#sunlight');
+      this.sunMoon = this.el;
+      this.scene = document.querySelector('a-scene');
 
-          if (this.isDay) {
-            // To Night
-            this.sky.setAttribute('color', '#0a1428');
-            this.light.setAttribute('intensity', 0.03);
-            this.sceneEl.setAttribute('fog', 'color: #0a1428; density: 0.05');
-            birds.forEach(b => b.setAttribute('visible', false));
-            stars.forEach(s => s.setAttribute('material', 'opacity', 1));
-            this.sunMoon.setAttribute('color', '#f0f4f8');
-            this.sunMoon.setAttribute('material', 'emissive: #dde4ff; emissiveIntensity: 0.9');
-            this.sunMoon.setAttribute('light', 'type: point; intensity: 2.2; distance: 50');
+      this.el.addEventListener('click', () => this.toggle());
+    },
+    toggle: function () {
+      if (this.isDay) {
+        // → Night
+        this.sky.setAttribute('color', '#0a1428');
+        this.light.setAttribute('intensity', 0.03);
+        this.scene.setAttribute('fog', 'color:#0a1428; density:0.06');
+        document.querySelectorAll('.day-birds').forEach(b=>b.setAttribute('visible',false));
+        document.querySelectorAll('.night-star').forEach(s=>s.setAttribute('material','opacity',1));
+        this.sunMoon.setAttribute('color', '#f0f4f8');
+        this.sunMoon.setAttribute('material', 'emissive:#dde4ff; emissiveIntensity:1');
+        this.sunMoon.setAttribute('light', 'type:point; intensity:3; distance:70; decay:2');
+      } else {
+        // → Day
+        this.sky.setAttribute('color', '#81ecec');
+        this.light.setAttribute('intensity', 1);
+        this.scene.setAttribute('fog', 'color:#e0f7fa; density:0.035');
+        document.querySelectorAll('.day-birds').forEach(b=>b.setAttribute('visible',true));
+        document.querySelectorAll('.night-star').forEach(s=>s.setAttribute('material','opacity',0));
+        this.sunMoon.setAttribute('color', '#ff7675');
+        this.sunMoon.removeAttribute('light');
+        this.sunMoon.setAttribute('material', 'shader:flat');
+      }
+      this.isDay = !this.isDay;
+    }
+  });
 
-            // Night text = white
-            this.panel.classList.remove('day-text');
-            this.panel.classList.add('night-text');
-          } else {
-            // To Day
-            this.sky.setAttribute('color', '#81ecec');
-            this.light.setAttribute('intensity', 1);
-            this.sceneEl.setAttribute('fog', 'color: #e0f7fa; density: 0.04');
-            birds.forEach(b => b.setAttribute('visible', true));
-            stars.forEach(s => s.setAttribute('material', 'opacity', 0));
-            this.sunMoon.setAttribute('color', '#ff7675');
-            this.sunMoon.setAttribute('material', 'shader: flat');
-            this.sunMoon.removeAttribute('light');
+  // ====================== ERA TRANSFORMATION ON GAZE ======================
+  const sky = document.getElementById('sky');
+  const ground = document.getElementById('ground');
+  const sceneEl = document.querySelector('a-scene');
+  const ambient = document.getElementById('ambient');
+  const sunlight = document.getElementById('sunlight');
+  const particles = document.getElementById('particles');
+  const panel = document.getElementById('info-panel');
+  const title = document.getElementById('info-title');
+  const subtitle = document.getElementById('info-subtitle');
+  const textEl = document.getElementById('info-text');
 
-            // Day text = black
-            this.panel.classList.remove('night-text');
-            this.panel.classList.add('day-text');
-          }
-          this.isDay = !this.isDay;
-        }
-      });
+  const defaultState = { sky:"#81ecec", ground:"#f5f5dc", fog:"#e0f7fa", dens:0.035, textColor:"#ffffff", hideLife: false, effect: "none" };
 
-      // === INFO PANEL ON GAZE (FIXED FOR TREES) ===
-      const cursor = document.querySelector('a-cursor');
-      const panel = document.getElementById('info-panel');
-      const titleEl = document.getElementById('info-title');
-      const textEl = document.getElementById('info-text');
+  const themes = {
+    molten:    {sky:"#420a00", ground:"#1a0000", fog:"#8b0000", dens:0.02,  ambient:0.7, sun:0.9, textColor:"#ffccaa", hideLife: true, effect:"lava"},
+    storms:    {sky:"#001122", ground:"#000811", fog:"#001122", dens:0.06,  ambient:0.4, sun:0.1, textColor:"#88ccff", hideLife: true, effect:"rain"},
+    breath:    {sky:"#4a235a", ground:"#2e1a33", fog:"#702963", dens:0.04,  ambient:0.5, sun:0.3, textColor:"#ffccff", hideLife: true, effect:"bubbles"},
+    snowball:  {sky:"#bbdefb", ground:"#e8f4ff", fog:"#ffffff", dens:0.09,  ambient:0.8, sun:0.6, textColor:"#003366", hideLife: true, effect:"snow"},
+    cambrian:  {sky:"#0077b6", ground:"#48cae4", fog:"#ade8f4", dens:0.03,  ambient:0.7, sun:0.9, textColor:"#ffffff", hideLife: true, effect:"fish"},
+    forests:   {sky:"#1b4332", ground:"#052e16", fog:"#1b4332", dens:0.07,  ambient:0.6, sun:0.4, textColor:"#ccffcc", hideLife: false, effect:"spores"},
+    dinosaurs: {sky:"#40916c", ground:"#2d6a4f", fog:"#52b788", dens:0.03,  ambient:0.7, sun:1.0, textColor:"#ffffff", hideLife: false, effect:"ash"},
+    present:   defaultState
+  };
 
-      cursor.addEventListener('fusing', function (evt) {
-        const target = evt.detail.intersectedEl;
-        if (target && target.classList.contains('info-item')) {
-          titleEl.textContent = target.getAttribute('data-name') || "Mystery";
-          textEl.textContent = target.getAttribute('data-desc') || "It's vibing.";
-          panel.classList.add('show');
-        }
-      });
+  function applyTheme(theme) {
+    sky.setAttribute('color', theme.sky);
+    ground.setAttribute('color', theme.ground);
+    sceneEl.setAttribute('fog', `type:exponential; color:${theme.fog}; density:${theme.dens}`);
+    ambient.setAttribute('intensity', theme.ambient || 0.6);
+    sunlight.setAttribute('intensity', theme.sun || 1);
+    panel.style.color = theme.textColor;
+    title.style.color = theme.textColor;
+    subtitle.style.color = theme.textColor;
+    textEl.style.color = theme.textColor;
 
-      // Hide when not looking
-      document.querySelector('a-scene').addEventListener('click', () => {
-        setTimeout(() => {
-          if (!cursor.components.cursor.intersectedEl?.classList.contains('info-item')) {
-            panel.classList.remove('show');
-          }
-        }, 100);
-      });
-    </script>
-  </body>
+    document.querySelectorAll('.life').forEach(el => el.setAttribute('visible', !theme.hideLife));
+
+    particles.innerHTML = ''; // clear previous particles
+    if (theme.effect && theme.effect !== 'none') createParticles(theme.effect);
+  }
+
+  function createParticles(type) {
+    const num = 80;
+    let color, startY, endY, durBase, dir;
+    switch (type) {
+      case 'snow':
+        color = '#ffffff'; startY = 25; endY = -5; durBase = 9000; dir = 'down';
+        break;
+      case 'rain':
+        color = '#3399ff'; startY = 30; endY = -5; durBase = 3000; dir = 'down';
+        break;
+      case 'lava':
+        color = '#ff4500'; startY = 0; endY = 15; durBase = 5000; dir = 'up';
+        break;
+      case 'bubbles':
+        color = '#add8e6'; startY = 0; endY = 20; durBase = 7000; dir = 'up';
+        break;
+      default: return;
+    }
+
+    for (let i = 0; i < num; i++) {
+      const particle = document.createElement('a-sphere');
+      const x = Math.random() * 100 - 50;
+      const z = Math.random() * 100 - 50;
+      particle.setAttribute('position', `${x} ${startY + Math.random() * 10 - 5} ${z}`);
+      particle.setAttribute('radius', 0.05 + Math.random() * 0.05);
+      particle.setAttribute('color', color);
+      particle.setAttribute('material', 'opacity: 0.7');
+      const endPos = `${x} ${endY + Math.random() * 5} ${z}`;
+      particle.setAttribute('animation', `property: position; to: ${endPos}; dur: ${durBase + Math.random() * 4000}; easing: linear; loop: true`);
+      particles.appendChild(particle);
+    }
+  }
+
+  function resetToPresent() {
+    applyTheme(defaultState);
+    particles.innerHTML = '';
+  }
+
+  // Gaze detection
+  document.querySelector('a-cursor').addEventListener('fusing', evt => {
+    const target = evt.detail.intersectedEl;
+    if (target) {
+      title.textContent = target.getAttribute('data-name') || 'Mystery';
+      subtitle.textContent = target.getAttribute('data-subtitle') || '';
+      textEl.textContent = target.getAttribute('data-desc') || 'It is vibing.';
+      panel.classList.add('show');
+
+      if (target.classList.contains('era-orb')) {
+        const era = target.getAttribute('data-era');
+        applyTheme(themes[era] || defaultState);
+      }
+    }
+  });
+
+  // Instantly return when gaze leaves
+  document.querySelector('a-scene').addEventListener('click', () => {
+    setTimeout(() => {
+      const intersected = document.querySelector('a-cursor').components.cursor.intersectedEl;
+      if (!intersected || (!intersected.classList.contains('era-orb') && !intersected.classList.contains('info-item'))) {
+        panel.classList.remove('show');
+        resetToPresent();
+      }
+    }, 150);
+  });
+
+  // Initial state
+  resetToPresent();
+</script>
+</body>
 </html>
