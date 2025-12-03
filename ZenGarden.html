@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Procedural Zen Garden</title>
+    <script src="https://aframe.io/releases/1.6.0/aframe.min.js"></script>
+    <style>
+      #overlay {
+        position: fixed;
+        top: 0; left: 0; width: 100%; height: 100%;
+        background: rgba(0,0,0,0.8);
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        z-index: 999;
+        color: white;
+        font-family: 'Courier New', Courier, monospace;
+        text-align: center;
+        pointer-events: auto;
+      }
+      .btn {
+        background: #ff9ff3;
+        color: #2d3436;
+        padding: 15px 30px;
+        font-size: 1.2rem;
+        border: none;
+        border-radius: 50px;
+        margin-top: 20px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: transform 0.2s;
+      }
+      .btn:hover { transform: scale(1.05); }
+      .a-enter-vr-button { bottom: 20px !important; }
+    </style>
+
+    <script>
+      // === COMPONENT: GARDEN GENERATOR ===
+      // Handles the random placement of rocks, trees, and particles
+      AFRAME.registerComponent('garden-generator', {
+        init: function () {
+          const scene = this.el;
+          
+          // 1. Generate Rocks
+          const rockColors = ['#636e72', '#b2bec3', '#2d3436'];
+          for(let i=0; i<8; i++) {
+            let rock = document.createElement('a-dodecahedron');
+            let x = (Math.random() * 20) - 10;
+            let z = (Math.random() * 20) - 10;
+            // Avoid center area where user stands
+            if (x > -2 && x < 2 && z > -2 && z < 2) continue;
+
+            let scale = 0.5 + Math.random();
+            
+            rock.setAttribute('position', {x: x, y: scale/2, z: z});
+            rock.setAttribute('color', rockColors[Math.floor(Math.random() * rockColors.length)]);
+            rock.setAttribute('radius', scale);
+            rock.setAttribute('shadow', 'cast: true; receive: true');
+            scene.appendChild(rock);
+          }
+
+          // 2. Generate Stylized Trees (Sakura)
+          const treeColors = ['#ff9ff3', '#fd79a8', '#e84393'];
+          for(let i=0; i<12; i++) {
+            let treeGroup = document.createElement('a-entity');
+            let x = (Math.random() * 24) - 12;
+            let z = (Math.random() * 24) - 12;
+            if (x > -3 && x < 3 && z > -3 && z < 3) continue;
+
+            treeGroup.setAttribute('position', {x: x, y: 0, z: z});
+
+            // Trunk
+            let trunk = document.createElement('a-cylinder');
+            trunk.setAttribute('height', 1.5);
+            trunk.setAttribute('radius', 0.15);
+            trunk.setAttribute('color', '#8d6e63');
+            trunk.setAttribute('position', '0 0.75 0');
+            trunk.setAttribute('shadow', 'cast: true');
+            treeGroup.appendChild(trunk);
+
+            // Leaves (Low Poly Icosahedron)
+            let leaves = document.createElement('a-icosahedron');
+            leaves.setAttribute('radius', 1 + Math.random());
+            leaves.setAttribute('color', treeColors[Math.floor(Math.random() * treeColors.length)]);
+            leaves.setAttribute('position', '0 2 0');
+            leaves.setAttribute('shadow', 'cast: true');
+            
+            // Gentle sway animation for leaves
+            leaves.setAttribute('animation', {
+              property: 'rotation',
+              to: `${Math.random()*5} ${Math.random()*5} ${Math.random()*5}`,
+              dir: 'alternate',
+              dur: 2000 + Math.random() * 2000,
+              loop: true,
+              easing: 'easeInOutSine'
+            });
+
+            treeGroup.appendChild(leaves);
+            scene.appendChild(treeGroup);
+          }
+
+          // 3. Generate "Fireflies" (Floating particles)
+          for(let i=0; i<15; i++) {
+            let fly = document.createElement('a-sphere');
+            let x = (Math.random() * 10) - 5;
+            let y = 1 + Math.random() * 2;
+            let z = (Math.random() * 10) - 5;
+            
+            fly.setAttribute('radius', 0.03);
+            fly.setAttribute('color', '#ffeaa7');
+            fly.setAttribute('shader', 'flat');
+            fly.setAttribute('position', {x:x, y:y, z:z});
+            
+            // Bobbing animation
+            fly.setAttribute('animation', {
+              property: 'position',
+              to: `${x} ${y+0.5} ${z}`,
+              dir: 'alternate',
+              dur: 1000 + Math.random() * 2000,
+              loop: true,
+              easing: 'easeInOutSine'
+            });
+            
+            scene.appendChild(fly);
+          }
+        }
+      });
+
+      // === COMPONENT: ATMOSPHERE CONTROLLER ===
+      // Changes Day/Night when looking at the sun
+      AFRAME.registerComponent('atmosphere-control', {
+        init: function() {
+          this.isDay = true;
+          this.sky = document.querySelector('a-sky');
+          this.light = document.querySelector('#mainLight');
+          this.fog = document.querySelector('a-scene');
+          
+          this.el.addEventListener('click', () => {
+             this.toggleTime();
+          });
+          
+          this.el.addEventListener('mouseenter', () => {
+             this.el.setAttribute('scale', '1.2 1.2 1.2');
+          });
+          
+          this.el.addEventListener('mouseleave', () => {
+             this.el.setAttribute('scale', '1 1 1');
+          });
+        },
+
+        toggleTime: function() {
+          if (this.isDay) {
+            // Switch to Evening/Night
+            this.sky.setAttribute('animation__color', {property: 'color', to: '#2c3e50', dur: 2000});
+            this.light.setAttribute('animation__intensity', {property: 'intensity', to: 0.2, dur: 2000});
+            this.fog.setAttribute('fog', 'color', '#2c3e50');
+            this.el.setAttribute('material', 'color', '#f1c40f'); // Moon color
+          } else {
+            // Switch to Day
+            this.sky.setAttribute('animation__color', {property: 'color', to: '#81ecec', dur: 2000});
+            this.light.setAttribute('animation__intensity', {property: 'intensity', to: 1.0, dur: 2000});
+            this.fog.setAttribute('fog', 'color', '#e0f7fa');
+            this.el.setAttribute('material', 'color', '#ff7675'); // Sun color
+          }
+          this.isDay = !this.isDay;
+        }
+      });
+    </script>
+  </head>
+  <body>
+
+    <div id="overlay">
+      <h1>🌸 ZEN GARDEN VR 🌸</h1>
+      <p>A procedurally generated world.</p>
+      <p>1. Tap VR Button (bottom right)</p>
+      <p>2. Insert Phone</p>
+      <p>3. <b>Stare at the Sun</b> to change time of day.</p>
+      <button class="btn" onclick="document.querySelector('#overlay').style.display='none'">ENTER PEACE</button>
+    </div>
+
+    <!-- Scene with Fog for atmosphere -->
+    <a-scene garden-generator fog="type: exponential; color: #e0f7fa; density: 0.04" background="color: #81ecec" shadow="type: pcfsoft">
+      
+      <!-- ENVIRONMENT -->
+      <a-sky color="#81ecec"></a-sky>
+      
+      <!-- Ground: Sand -->
+      <a-plane rotation="-90 0 0" width="100" height="100" color="#f5f5dc" shadow="receive: true"></a-plane>
+      
+      <!-- LIGHTING -->
+      <a-light type="ambient" color="#CCC" intensity="0.5"></a-light>
+      <a-light id="mainLight" type="directional" position="-1 10 1" intensity="1" castShadow="true" target="#sun"></a-light>
+
+      <!-- INTERACTIVE SUN/MOON -->
+      <a-sphere 
+        id="sun"
+        class="clickable" 
+        atmosphere-control
+        position="0 4 -8" 
+        radius="1.5" 
+        color="#ff7675"
+        shader="flat"
+        animation="property: position; to: 0 4.2 -8; dir: alternate; dur: 3000; loop: true">
+      </a-sphere>
+
+      <!-- PLAYER RIG -->
+      <a-entity position="0 1.6 0">
+        <a-camera look-controls="pointerLockEnabled: false" wasd-controls="enabled: false">
+          
+          <!-- Gaze Cursor -->
+          <!-- Fuse=true allows clicking by staring -->
+          <a-cursor
+            id="cursor"
+            color="white"
+            fuse="true"
+            fuse-timeout="1500"
+            raycaster="objects: .clickable"
+            animation__click="property: scale; startEvents: click; from: 0.1 0.1 0.1; to: 1 1 1; dur: 150"
+            animation__fusing="property: scale; startEvents: fusing; from: 1 1 1; to: 0.1 0.1 0.1; dur: 1500">
+          </a-cursor>
+
+        </a-camera>
+      </a-entity>
+
+    </a-scene>
+  </body>
+</html>
